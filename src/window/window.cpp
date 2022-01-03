@@ -1,65 +1,80 @@
 #include "window.h"
+#include "../../include/SDL2/SDL_image.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 
-namespace window {
-void Window::Run() {
-  //  uint32_t DELAY = 5 * 1000;
-  uint32_t WIDTH = 680;
-  uint32_t HEIGHT = 480;
-  uint32_t X_POS = 50;
-  uint32_t Y_POS = 50;
-
-  if (!_Init()) {
-    std::cout << "Failed to initialize window..." << std::endl;
+void window::run() {
+  if (!_init()) {
     return;
   }
-
-  SDL_Window *win = SDL_CreateWindow("Text Editor", X_POS, Y_POS, WIDTH, HEIGHT,
-                                     SDL_WINDOW_RESIZABLE);
-  if (!win) {
-    std::cout << "Cannot create editor...";
+  if (!_loadimage("ball.jpg")) {
     return;
   }
+  _blitsurface(_image, _wsurface);
+  _updatewindowsurface();
+  _delay(3000);
 
-  _CreateSurface(win);
-
-  // SDL_Delay(DELAY);
+  /*
   SDL_Event e;
   bool quit = false;
   while (!quit) {
     while (SDL_PollEvent(&e)) {
-      if ((e.type == SDL_QUIT) || (e.type == SDL_KEYDOWN) ||
-          (e.type == SDL_MOUSEBUTTONDOWN)) {
+      switch (e.type) {
+      case SDL_QUIT:
         quit = true;
+        break;
       }
     }
   }
+  */
 
-  _Destroy(win);
+  _destroy();
 }
 
-void Window::RunPythonScript(const std::string &filepath) {
-  std::string command = "python " + filepath;
-  system(command.c_str());
-}
+bool window::_init() {
+  bool status = true;
+  int WIDTH = 750;
+  int HEIGHT = 750;
+  int X_POS = 100;
+  int Y_POS = 125;
 
-bool Window::_Init() {
-  return SDL_Init(SDL_INIT_VIDEO) == 0; // true = success, else false
-}
-
-void Window::_CreateSurface(SDL_Window *&window) {
-  SDL_Surface *surface = SDL_GetWindowSurface(window);
-  if (!surface) {
-    std::cout << "Failed to get surface..." << std::endl;
-    return;
+  _win = SDL_CreateWindow("Text Editor", X_POS, Y_POS, WIDTH, HEIGHT,
+                          SDL_WINDOW_RESIZABLE);
+  if (!_win) {
+    SDL_Log("Error creating editor: %s", SDL_GetError());
+    status = false;
   }
-  SDL_UpdateWindowSurface(window);
+  _wsurface = SDL_GetWindowSurface(_win);
+  if (!_wsurface) {
+    SDL_Log("Error creating _window surface: %s", SDL_GetError());
+    status = false;
+  }
+  return status;
 }
 
-void Window::_Destroy(SDL_Window *&window) {
-  SDL_DestroyWindow(window);
+bool window::_loadimage(const char *filepath) {
+  bool status = true;
+  _image = IMG_Load(filepath);
+  // _image = SDL_LoadBMP(filepath);
+  if (!_image) {
+    SDL_Log("Error creating bball image surface: %s", SDL_GetError());
+    status = false;
+  }
+  return status;
+}
+
+void window::_blitsurface(SDL_Surface *src, SDL_Surface *dest) {
+  SDL_BlitSurface(src, NULL, dest, NULL);
+}
+
+void window::_updatewindowsurface() { SDL_UpdateWindowSurface(_win); }
+
+void window::_delay(uint32_t delay) { SDL_Delay(delay); }
+
+void window::_destroy() {
+  SDL_FreeSurface(_image);
+  SDL_DestroyWindow(_win);
+  _image = NULL;
+  _win = NULL;
   SDL_Quit();
 }
-
-} // namespace window

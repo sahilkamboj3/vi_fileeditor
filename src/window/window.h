@@ -1,15 +1,18 @@
 #include <SDL2/SDL.h>
 #include <string>
 
-namespace window {
-class Window {
+class window {
 public:
-  void Run();
-  void RunPythonScript(const std::string &filepath);
+  void run();
 
 private:
-  bool _Init();
-  void _CreateSurface(SDL_Window *&window);
-  void _Destroy(SDL_Window *&window);
+  SDL_Window *_win = NULL;       // window
+  SDL_Surface *_wsurface = NULL; // surface on window
+  SDL_Surface *_image = NULL;    // surface for image
+  bool _init();
+  bool _loadimage(const char *filepath);
+  void _blitsurface(SDL_Surface *src, SDL_Surface *dest);
+  void _updatewindowsurface();
+  void _delay(uint32_t delay);
+  void _destroy();
 };
-} // namespace window
