@@ -8,10 +8,11 @@ public:
   window();
   ~window();
   bool init();
+  void centerwindow(float resize_relocate_ratio);
   void loadimage(const char *filepath);
   void loadimage(SDL_Surface *filepath);
+  void readfromfile(const char *filepath);
   void run();
-  void centerwindow(float resize_relocate_ratio);
 
 private:
   SDL_Window *win;

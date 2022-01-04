@@ -1,5 +1,6 @@
 #include "window.h"
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 // public functions
 window::window() { win = NULL; }
@@ -62,6 +63,27 @@ void window::centerwindow(float resize_relocate_ratio) {
   int NEW_HEIGHT = rect.h * resize_relocate_ratio;
   resizewindow(NEW_WIDTH, NEW_HEIGHT);
   movewindow((rect.w - NEW_WIDTH) / 2, (rect.h - NEW_HEIGHT) / 2);
+}
+
+void window::readfromfile(const char *filepath) {
+  SDL_RWops *stream;
+  if (!(stream = SDL_RWFromFile(filepath, "rb"))) {
+    std::cout << "Error loading file " << filepath << ": " << SDL_GetError()
+              << std::endl;
+  }
+  std::cout << "size: " << SDL_RWsize(stream) << std::endl;
+  size_t streamsize = SDL_RWsize(stream);
+  char text[streamsize];
+  size_t totread = 0, read;
+  int times = 0;
+  while (totread < streamsize) {
+    times++;
+    if (!(read = SDL_RWread(stream, text, 1, streamsize - totread)))
+      break;
+    totread += read;
+  }
+  std::cout << text << std::endl;
+  SDL_FreeRW(stream);
 }
 
 // private functions
