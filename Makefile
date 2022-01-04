@@ -1,10 +1,13 @@
-CC=g++
-CFLAGS=-Wall -std=c++11
-TARGET=main
-all=$(TARGET)
+CC = g++
+COMPILER_FLAGS = -std=c++11 -Wall -O0 -g
+LINKER_FLAGS = -lsdl2 -lsdl2_image
+INCLUDE_PATHS = -Iinclude
+LIBRARY_PATHS = -Llib
+SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp) $(SRC_DIR)/window/*.cpp
+BUILD_DIR = build/debug
+OBJ_NAME = main
+SRC_DIR = src
 
-$(TARGET): src/*.cpp src/window/*.cpp
-			$(CC) $(CFLAGS) -o $(TARGET) -I include -L lib -l SDL2-2.0.0 src/*.cpp src/window/*.cpp 
+all:
+	$(CC) $(COMPILER_FLAGS) $(LINKER_FLAGS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(SRC_FILES) -o $(BUILD_DIR)/$(OBJ_NAME)
 
-clean: $(TARGET)
-		$(RM) $(TARGET)
