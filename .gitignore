@@ -1,6 +1,7 @@
 *.o
 .vscode
 main
-/include
 todo.txt
+/include
 /build
+/lib
