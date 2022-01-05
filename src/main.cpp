@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
   }
   // resizing window because rect dimensions not retrievable in createwindow()
   w.centerwindow(0.75);
-  w.readfromfile("in.txt");
+  w.loadfile("build/debug/in.txt");
   w.run();
   sdl_quit();
   return 0;
