@@ -24,6 +24,7 @@ private:
   bool capslock = false;
   bool shiftdown = false;
   std::unordered_map<char, char> shift_x_pairs;
+  const int fontsize = 20;
 
   // render functions
   void rendersurfacetowindow(SDL_Surface *surface, SDL_Rect *src,

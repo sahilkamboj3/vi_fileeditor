@@ -164,12 +164,6 @@ void window::rendersurfacetowindow(SDL_Surface *surface, SDL_Rect *src,
   SDL_RenderPresent(renderer);
   SDL_FreeSurface(surface);
   SDL_DestroyTexture(texture);
-
-  /*
-  SDL_Surface *wsurface = getwindowsurface();
-  blitsurface(surface, wsurface);
-  updatewindow();
-  */
 }
 
 void window::loadimage(const char *filepath) {
@@ -230,8 +224,9 @@ void window::rendertext() {
   SDL_GetWindowSize(win, &w, &h);
   dest.x = 0;
   dest.y = 0;
-  dest.w = w;
-  dest.h = h;
+  // dest.w = w * ();
+  dest.w = text.size() * 5; // 5px per char
+  dest.h = h / fontsize;
   rendersurfacetowindow(textsurface, NULL, &dest);
   delete[] cleanedtext;
 }
