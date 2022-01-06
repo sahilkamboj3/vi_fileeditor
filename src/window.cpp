@@ -1,4 +1,5 @@
 #include "window.h"
+#include "line.h"
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <fstream>
@@ -43,7 +44,10 @@ void window::destroy() {
 void window::writetofile() {
   std::ofstream file(filepath);
   if (file.is_open()) {
-    file << text;
+    for (line l : lines) {
+      std::string text = l.gettext();
+      file << text + '\n';
+    }
     file.close();
   } else {
     std::cout << "Error writing back to file " << filepath << std::endl;
@@ -81,6 +85,100 @@ void window::centerwindow(float resize_relocate_ratio) {
   movewindow((rect.w - NEW_WIDTH) / 2, (rect.h - NEW_HEIGHT) / 2);
 }
 
+void window::loadfile(const char *filepath) {
+  if (!readfromfile(filepath)) {
+    return;
+  }
+  renderclear();
+  renderlines();
+  renderpresent();
+}
+
+bool window::readfromfile(const char *filepath) {
+  this->filepath = filepath;
+  std::ifstream file(filepath);
+  std::string fline;
+  if (file.is_open()) {
+    while (getline(file, fline)) {
+      std::cout << "line: " << fline << std::endl;
+      line l(fline);
+      lines.push_back(l);
+    }
+    file.close();
+    return true;
+  }
+  std::cout << "Error opening file: " << filepath << std::endl;
+  return false;
+}
+
+void window::renderlines() {
+  if (!lines.size()) {
+    renderemptyscreen();
+    return;
+  }
+  // TTF_Font *font = TTF_OpenFont("Open_Sans/sans.ttf", 20); // sans
+  TTF_Font *font =
+      TTF_OpenFont("Courier_Prime/CourierPrime-Bold.ttf", 20); // sans
+  SDL_Color white = {255, 255, 255, 255};
+  int w, h;
+  SDL_GetWindowSize(win, &w, &h);
+
+  SDL_Rect linerect;
+  linerect.x = 0;
+  linerect.y = 0;
+  int linenum = 0;
+  for (line l : lines) {
+    std::string text = l.gettext();
+    if (text.size() > 0) {
+      const char *cleanedtext = stringtochar(text);
+      SDL_Surface *textsurface =
+          TTF_RenderText_Solid(font, cleanedtext, white); // create text surface
+      if (!textsurface) {
+        std::cout << "Error loading text surface: " << SDL_GetError()
+                  << std::endl;
+        return;
+      }
+      if (linenum++ == focuslineidx) {
+        SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+        SDL_RenderFillRect(renderer, &linerect);
+      } else {
+        SDL_SetRenderDrawColor(renderer, 19, 19, 19, 255);
+        SDL_RenderFillRect(renderer, &linerect);
+      }
+      copysurfacetorenderer(textsurface, NULL, &linerect);
+      delete[] cleanedtext;
+    }
+    linerect.y += linerect.h;
+  }
+}
+
+void window::copysurfacetorenderer(SDL_Surface *surface, SDL_Rect *src,
+                                   SDL_Rect *dest) {
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+  int w, h;
+  SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+  dest->w = w;
+  dest->h = h;
+  SDL_RenderCopy(renderer, texture, src, dest);
+  SDL_DestroyTexture(texture);
+}
+
+void window::renderclear() { SDL_RenderClear(renderer); }
+
+void window::renderpresent() { SDL_RenderPresent(renderer); }
+
+void window::incrementlinefocus() {
+  if (focuslineidx + 1 < lines.size()) {
+    focuslineidx++;
+  }
+}
+
+void window::decrementlinefocus() {
+  if (focuslineidx - 1 >= 0) {
+    focuslineidx--;
+  }
+}
+
 void window::run() {
   SDL_Event e;
   bool quit = false;
@@ -90,11 +188,23 @@ void window::run() {
       case SDL_QUIT:
         quit = true;
         break;
+        /*
+      case SDL_KEYDOWN:
+        incrementlinefocus();
+        std::cout << "key down: " << focuslineidx << std::endl;
+        renderclear();
+        renderlines();
+        renderpresent();
+        break;
+        */
       case SDL_KEYUP:
         handlekbup(e);
         break;
       case SDL_KEYDOWN:
         handlekbdown(e);
+        renderclear();
+        renderlines();
+        renderpresent();
         break;
       }
     }
@@ -114,8 +224,39 @@ void window::handlekbup(SDL_Event e) {
 }
 
 void window::handlekbdown(SDL_Event e) {
+  std::cout << "mode is " << mode << std::endl;
+  if (mode == VISUAL) {
+    handlekbdownvisualmode(e);
+  } else {
+    handlekbdowninsertmode(e);
+  }
+}
+
+void window::handlekbdownvisualmode(SDL_Event e) {
+  char c = *SDL_GetKeyName(e.key.keysym.sym);
+  if (c == 'J') {
+    incrementlinefocus();
+    // renderclear();
+    // renderlines();
+    // renderpresent();
+  } else if (c == 'K') {
+    decrementlinefocus();
+    // renderclear();
+    // renderlines();
+    // renderpresent();
+  } else if (tolower(c) == 'i') {
+    mode = INSERT;
+    std::cout << "mode change to insert" << std::endl;
+  }
+}
+
+void window::handlekbdowninsertmode(SDL_Event e) {
   char c;
   switch (e.key.keysym.sym) {
+  case SDLK_ESCAPE:
+    mode = VISUAL;
+    std::cout << "mode change to visual" << std::endl;
+    return;
   case SDLK_RSHIFT:
   case SDLK_LSHIFT:
     shiftdown = true;
@@ -130,15 +271,19 @@ void window::handlekbdown(SDL_Event e) {
     c = '\n';
     break;
   case SDLK_BACKSPACE:
-    if (text.size() > 0)
-      text.pop_back();
-    rendertext();
+    lines[focuslineidx].popchar();
+    // renderclear();
+    // renderlines();
+    // renderpresent();
     return;
   default:
     c = *SDL_GetKeyName(e.key.keysym.sym);
   }
-  text += cleanchar(c);
-  rendertext();
+  char cf = cleanchar(c);
+  lines[focuslineidx].addchar(cf);
+  // renderclear();
+  // renderlines();
+  // renderpresent();
 }
 
 char window::cleanchar(char c) {
@@ -155,80 +300,10 @@ char window::cleanchar(char c) {
   return shift_x_pairs[c];
 }
 
-void window::rendersurfacetowindow(SDL_Surface *surface, SDL_Rect *src,
-                                   SDL_Rect *dest) {
-  SDL_RenderClear(renderer);
-  SDL_SetRenderDrawColor(renderer, 19, 19, 19, 255); // red
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-  SDL_RenderCopy(renderer, texture, src, dest);
-  SDL_RenderPresent(renderer);
-  SDL_FreeSurface(surface);
-  SDL_DestroyTexture(texture);
-}
-
-void window::loadimage(const char *filepath) {
-  SDL_Surface *image = loadimagesurface(filepath);
-  rendersurfacetowindow(image, NULL, NULL);
-}
-
-void window::loadfile(const char *filepath) {
-  this->filepath = filepath;
-  if (!readfromfile(filepath)) {
-    return;
-  }
-  rendertext();
-}
-
-bool window::readfromfile(const char *filepath) {
-  std::ifstream file(filepath);
-  std::string line;
-  if (file.is_open()) {
-    while (getline(file, line)) {
-      text += line + '\n';
-    }
-    text.pop_back();
-    file.close();
-    return true;
-  }
-  std::cout << "Error opening file: " << filepath << std::endl;
-  return false;
-}
-
 void window::renderemptyscreen() {
   SDL_RenderClear(renderer);
   SDL_SetRenderDrawColor(renderer, 19, 19, 19, 255); // red
   SDL_RenderPresent(renderer);
-}
-
-void window::rendertext() {
-  if (!text.size()) {
-    renderemptyscreen();
-    return;
-  }
-  TTF_Font *font = TTF_OpenFont("Open_Sans/sans.ttf", 25); // sans
-  const char *cleanedtext = stringtochar(text);
-  // SDL_Surface *textsurface =
-  // TTF_RenderText_Solid(font, cleanedtext, white); // create text surface
-  SDL_Rect rect;
-  SDL_GetDisplayBounds(0, &rect);
-  SDL_Color white = {255, 255, 255, 255};
-
-  SDL_Surface *textsurface =
-      TTF_RenderText_Blended_Wrapped(font, cleanedtext, white, rect.w);
-  if (!textsurface) {
-    std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
-    return;
-  }
-  SDL_Rect dest;
-  int w, h;
-  SDL_GetWindowSize(win, &w, &h);
-  dest.x = 0;
-  dest.y = 0;
-  // dest.w = w * ();
-  dest.w = text.size() * 5; // 5px per char
-  dest.h = h / fontsize;
-  rendersurfacetowindow(textsurface, NULL, &dest);
-  delete[] cleanedtext;
 }
 
 // private functions
@@ -241,10 +316,6 @@ const char *window::stringtochar(std::string str) {
   char *cstr = new char[str.length() + 1];
   strcpy(cstr, str.c_str());
   return cstr;
-}
-
-SDL_Surface *window::loadimagesurface(const char *filepath) {
-  return IMG_Load(filepath);
 }
 
 SDL_Surface *window::getwindowsurface() { return SDL_GetWindowSurface(win); }

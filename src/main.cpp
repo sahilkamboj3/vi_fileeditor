@@ -14,5 +14,6 @@ int main(int argc, char *argv[]) {
   w.loadfile("build/debug/in.txt");
   w.run();
   sdl_quit();
-  return 0;
+
+  return EXIT_SUCCESS;
 }

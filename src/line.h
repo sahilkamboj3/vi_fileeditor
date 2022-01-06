@@ -6,6 +6,9 @@
 class line {
 public:
   line(std::string text);
+  void addchar(char &c);
+  void popchar();
+  std::string gettext();
 
 private:
   std::string text;
