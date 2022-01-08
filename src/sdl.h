@@ -16,7 +16,6 @@ bool sdl_init() {
     std::cout << "TTF_Init failed with error: " << TTF_GetError() << std::endl;
     return false;
   }
-  SDL_StartTextInput();
   return true;
 }
 

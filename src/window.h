@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -30,6 +31,7 @@ private:
 
   // window_file.cpp
   std::string filepath;
+  int linenumdigits = 0;
   bool readfromfile(std::string filepath);
   void writetofile();
 
@@ -51,15 +53,18 @@ private:
   // window_render.cpp
   int linerenderstartidx = 0;
   int linesrendering = 0;
-  const char *myfont = stringtochar("Courier_Prime/CourierPrime-Bold.ttf");
-  int fontsize = 20;
-  const int lineheight = 25;
   int focuslineidx = 0;
+  int letterrenderstartidx = 0;
+  int vimcursorstartidx = 0;
+  int focusletteridx = 0;
+  const char *myfont = stringtochar("SpaceMono.ttf");
+  int fontsize = 15;
   void setlinerenderendidx();
   void rendervimmode();
   void renderclear();
   void renderpresent();
   void renderlines();
+  void rendercursor();
   void renderemptyscreen();
   void copysurfacetorenderer(SDL_Surface *surface, SDL_Rect *src,
                              SDL_Rect *dest);
@@ -69,7 +74,10 @@ private:
   int windowheight = 0;
   int windowwidth = 0;
   int vimbackgroundheight = 0;
+  int vimletterwidth = 0;
+  int vimlineletterwidth = 0;
   void setvimbackgroundheight();
+  void setvimlineletterwidth();
   void setwindowheightwidth();
   void centerwindow(float resize_relocate_ratio);
   SDL_Surface *getwindowsurface();

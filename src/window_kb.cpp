@@ -22,8 +22,11 @@ void window::handlekbdown(SDL_Event e) {
 
 void window::handlekbdownvisualmode(SDL_Event e) {
   char c = *SDL_GetKeyName(e.key.keysym.sym);
+
   if (c == 'J') {
-    if (focuslineidx < linesrendering - 1) {
+    if (lines.size() < linesrendering) {
+      incrementlinefocus();
+    } else if (focuslineidx < linesrendering - 1) {
       focuslineidx++;
     } else if (linerenderstartidx + linesrendering < lines.size()) {
       linerenderstartidx++;
@@ -36,6 +39,18 @@ void window::handlekbdownvisualmode(SDL_Event e) {
     }
   } else if (tolower(c) == 'i') {
     mode = INSERT;
+  } else if (c == 'L') {
+    if (vimcursorstartidx + 1 < vimlineletterwidth) {
+      vimcursorstartidx++;
+    } else {
+      letterrenderstartidx++;
+    }
+  } else if (c == 'H') {
+    if (vimcursorstartidx == 0 && letterrenderstartidx > 0) {
+      letterrenderstartidx--;
+    } else {
+      vimcursorstartidx--;
+    }
   }
 }
 
@@ -64,7 +79,7 @@ void window::handlekbdowninsertmode(SDL_Event e) {
     c = '\n';
     break;
   case SDLK_BACKSPACE:
-    lines[focuslineidx].popchar();
+    lines[linerenderstartidx + focuslineidx].popchar();
     return;
   default:
     c = *SDL_GetKeyName(e.key.keysym.sym);

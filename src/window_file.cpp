@@ -4,6 +4,7 @@ void window::loadfile(std::string filepath) {
   if (!readfromfile(filepath)) {
     return;
   }
+  setvimlineletterwidth();
   renderclear();
   renderlines();
   rendervimmode();
@@ -20,6 +21,11 @@ bool window::readfromfile(std::string filepath) {
       line l(fline, linenum++);
       lines.push_back(l);
     }
+    if (!lines.size()) {
+      line l(1);
+      lines.push_back(l);
+    }
+    linenumdigits = log10(lines.size()) + 1;
     file.close();
     return true;
   }

@@ -10,7 +10,7 @@ void window::centerwindow(float resize_relocate_ratio) {
 }
 
 void window::setlinesrendering() {
-  linesrendering = (windowheight / vimbackgroundheight) - 2;
+  linesrendering = (windowheight / vimbackgroundheight) - 2; // - 2;
 }
 
 void window::setwindowheightwidth() {
@@ -22,24 +22,30 @@ void window::setvimbackgroundheight() {
 
   TTF_Font *font = TTF_OpenFont(myfont, fontsize);
   SDL_Color white = {255, 255, 255, 255};
-  SDL_Rect linerect;
-  linerect.x = 0;
-  linerect.y = 0;
+  SDL_Rect lrect;
+  lrect.x = 0;
+  lrect.y = 0;
   const char *cleanedtext = stringtochar(text);
   SDL_Surface *textsurface =
-      TTF_RenderText_Solid(font, cleanedtext, white); // create text surface
+      TTF_RenderText_Blended(font, cleanedtext, white); // create text surface
   if (!textsurface) {
     std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
     return;
   }
   delete[] cleanedtext;
 
-  int h;
+  int w;
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, textsurface);
-  SDL_QueryTexture(texture, NULL, NULL, NULL, &vimbackgroundheight);
-  SDL_GetWindowSize(win, NULL, &h);
+  SDL_QueryTexture(texture, NULL, NULL, &w, &vimbackgroundheight);
+  vimletterwidth = w / text.size();
+  TTF_CloseFont(font);
   SDL_FreeSurface(textsurface);
   SDL_DestroyTexture(texture);
+}
+
+void window::setvimlineletterwidth() {
+  vimlineletterwidth = (windowwidth / vimletterwidth) - (linenumdigits + 1) -
+                       2; // how many letters fit in a line
 }
 
 void window::resizewindow(int width, int height) {
