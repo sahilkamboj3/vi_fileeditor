@@ -22,6 +22,7 @@ window::window() {
   shift_x_pairs[']'] = '}';
   shift_x_pairs['-'] = '_';
   shift_x_pairs['='] = '+';
+  shift_x_pairs['\''] = '\"';
 }
 
 window::~window() { destroy(); }
@@ -30,7 +31,6 @@ void window::destroy() {
   writetofile();
   SDL_DestroyWindow(win);
   SDL_DestroyRenderer(renderer);
-  // delete[] FONT;
   win = nullptr;
   renderer = nullptr;
 }

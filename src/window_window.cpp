@@ -24,14 +24,13 @@ void window::setlineheightandletterwidth() {
 
   TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
   const char *cleanedtext = stringtochar(text);
-  SDL_Surface *textsurface = TTF_RenderText_Blended(
-      font, cleanedtext,
-      (SDL_Color){WHITE.r, WHITE.g, WHITE.b, WHITE.a}); // create text surface
+  SDL_Surface *textsurface =
+      TTF_RenderText_Blended(font, cleanedtext,
+                             WHITE); // create text surface
   if (!textsurface) {
     std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
     return;
   }
-  // delete[] cleanedtext;
 
   int w;
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, textsurface);

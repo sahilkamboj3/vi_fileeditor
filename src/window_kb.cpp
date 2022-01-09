@@ -94,7 +94,7 @@ void window::handlekbdownvisualmode(SDL_Event e) {
     return;
   } else if (!shiftdown && c == 'O') {
     mode = INSERT;
-    line l(startinglinerenderidx + focuslineidx + 2);
+    line l;
     lines.insert(lines.begin() + startinglinerenderidx + focuslineidx + 1, l);
     if (focuslineidx == numlinesonwindow - 1)
       startinglinerenderidx++;
@@ -102,8 +102,19 @@ void window::handlekbdownvisualmode(SDL_Event e) {
       focuslineidx++;
   } else if (shiftdown && c == 'O') {
     mode = INSERT;
-    line l(0);
-    lines.insert(lines.begin() + startinglinerenderidx + focuslineidx - 1, l);
+    line l;
+    lines.insert(lines.begin() + startinglinerenderidx + focuslineidx, l);
+    if (focuslineidx == numlinesonwindow - 1) {
+      startinglinerenderidx++;
+      focuslineidx = numlinesonwindow - 2;
+    }
+
+  } else if (shiftdown && c == 'G') {
+    startinglinerenderidx = std::max(0, (int)lines.size() - numlinesonwindow);
+    if (!startinglinerenderidx)
+      focuslineidx = lines.size() - 1;
+    else
+      focuslineidx = numlinesonwindow - 1;
   }
 
   std::string text = lines[startinglinerenderidx + focuslineidx].gettext();
@@ -147,9 +158,23 @@ void window::handlekbdowninsertmode(SDL_Event e) {
   case SDLK_SPACE:
     c = ' ';
     break;
-  case SDLK_KP_ENTER:
-    c = '\n';
-    break;
+    // should be same as 'o' in visual mode
+  case SDLK_RETURN:     // enter key on the main keyboard
+  case SDLK_KP_ENTER: { // enter key on the numeric keyboard
+    mode = INSERT;
+    std::string text =
+        lines[startinglinerenderidx + focuslineidx].gettext(cursorindex);
+    lines[startinglinerenderidx + focuslineidx].removestr(cursorindex);
+    line l(text);
+    lines.insert(lines.begin() + startinglinerenderidx + focuslineidx + 1, l);
+    if (focuslineidx == numlinesonwindow - 1)
+      startinglinerenderidx++;
+    else
+      focuslineidx++;
+    startingletterrenderidx = 0;
+    cursorindex = 0;
+    return;
+  }
   case SDLK_BACKSPACE:
     if (startingletterrenderidx + cursorindex) {
       lines[startinglinerenderidx + focuslineidx].popchar(

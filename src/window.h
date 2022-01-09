@@ -43,9 +43,13 @@ private:
   const char *FONT = stringtochar(FONTNAME);
   const int FONTSIZE = 20;
   const int TABTOSPACE = 4;
-  const COLOR WHITE{255, 255, 255, 255};
-  const COLOR DARKGREY{38, 38, 38, 255};
-  const COLOR RED{255, 0, 0, 255};
+  // const COLOR WHITE{255, 255, 255, 255};
+  // const COLOR DARKGREY{38, 38, 38, 255};
+  // const COLOR RED{255, 0, 0, 255};
+  SDL_Color WHITE = {255, 255, 255, 255};
+  SDL_Color DARKGREY = {38, 38, 38, 255};
+  SDL_Color RED = {255, 0, 0, 255};
+
   bool capslock = false, shiftdown = false;
   // cursorindex indicates the letter user is on, startingletterrenderidx and
   // startinglinerenderidx indicate index to start rendering the letter and line

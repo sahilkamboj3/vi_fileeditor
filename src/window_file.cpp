@@ -4,14 +4,13 @@ bool window::readfromfile(std::string filepath) {
   this->filepath = filepath;
   std::ifstream file(filepath);
   std::string fline;
-  int linenum = 1;
   if (file.is_open()) {
     while (getline(file, fline)) {
-      line l(fline, linenum++);
+      line l(fline);
       lines.push_back(l);
     }
     if (!lines.size()) {
-      line l(1);
+      line l;
       lines.push_back(l);
     }
     linesizedigits = getnumdigits(lines.size());

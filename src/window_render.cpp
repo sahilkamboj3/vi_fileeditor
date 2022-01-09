@@ -29,20 +29,16 @@ void window::rendervimmode() {
   SDL_Rect lrect;
   lrect.x = letterwidth;
   lrect.y = windowheight - lineheight;
-  // lrect.w = windowwidth - (2 * letterwidth);
   std::string text;
   const char *cleanedtext;
   if (mode == VISUAL) {
-    // cleanedtext = stringtochar("VISUAL");
     text = "VISUAL";
   } else {
-    // cleanedtext = stringtochar("INSERT");
     text = "INSERT";
   }
   cleanedtext = stringtochar(text);
-  SDL_Surface *textsurface = TTF_RenderText_Blended(
-      font, cleanedtext,
-      (SDL_Color){RED.r, RED.g, RED.b, RED.a}); // create text surface
+  SDL_Surface *textsurface = TTF_RenderText_Blended(font, cleanedtext,
+                                                    RED); // create text surface
   if (!textsurface) {
     std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
     return;
@@ -51,7 +47,6 @@ void window::rendervimmode() {
                          DARKGREY.a);
   SDL_RenderFillRect(renderer, &lrect);
   copysurfacetorenderer(textsurface, NULL, &lrect);
-  // delete[] cleanedtext;
   TTF_CloseFont(font);
 }
 
@@ -65,9 +60,8 @@ void window::renderlineletterslot() {
   lrect.x = windowwidth - ((text.size() + 1) * letterwidth);
   lrect.y = windowheight - lineheight;
   const char *cleanedtext = stringtochar(text);
-  SDL_Surface *textsurface = TTF_RenderText_Blended(
-      font, cleanedtext,
-      (SDL_Color){RED.r, RED.g, RED.b, RED.a}); // create text surface
+  SDL_Surface *textsurface = TTF_RenderText_Blended(font, cleanedtext,
+                                                    RED); // create text surface
   if (!textsurface) {
     std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
     return;
@@ -76,7 +70,6 @@ void window::renderlineletterslot() {
                          DARKGREY.a);
   SDL_RenderFillRect(renderer, &lrect);
   copysurfacetorenderer(textsurface, NULL, &lrect);
-  // delete[] cleanedtext;
   TTF_CloseFont(font);
 }
 
@@ -94,7 +87,6 @@ void window::renderlines() {
 
   lrect.x = (1 + linesizedigits + 1) * letterwidth;
   lrect.y = 0;
-  // lrect.w = windowwidth - ((linesizedigits + 3) * letterwidth);
   lrect.h = lineheight;
 
   int lineidx = 0;
@@ -108,20 +100,17 @@ void window::renderlines() {
 
   for (int i = startinglinerenderidx; i < endidx; i++) {
     // handle line number
-    // int linenum = lines[i].getlinenum();
     int linenum = i + 1;
-    // std::string linenumstr = std::to_string(linenum);
     const char *cleanedlinenum = inttochar(linenum);
-    SDL_Surface *lnsurface = TTF_RenderText_Blended(
-        font, cleanedlinenum,
-        (SDL_Color){WHITE.r, WHITE.g, WHITE.b, WHITE.a}); // create text surface
+    SDL_Surface *lnsurface =
+        TTF_RenderText_Blended(font, cleanedlinenum,
+                               WHITE); // create text surface
     if (!lnsurface) {
       std::cout << "Error loading line number surface: " << SDL_GetError()
                 << std::endl;
       return;
     }
     copysurfacetorenderer(lnsurface, NULL, &lnrect);
-    // delete[] cleanedlinenum;
 
     // handle text
     std::string text = lines[i].gettext(startingletterrenderidx, charsperline);
@@ -129,8 +118,7 @@ void window::renderlines() {
       const char *cleanedtext = stringtochar(text);
       SDL_Surface *textsurface =
           TTF_RenderText_Blended(font, cleanedtext,
-                                 (SDL_Color){WHITE.r, WHITE.g, WHITE.b,
-                                             WHITE.a}); // create text surface
+                                 WHITE); // create text surface
       if (!textsurface) {
         std::cout << "Error loading text surface: " << SDL_GetError()
                   << std::endl;
@@ -138,7 +126,6 @@ void window::renderlines() {
       }
 
       copysurfacetorenderer(textsurface, NULL, &lrect);
-      // delete[] cleanedtext;
     }
     lineidx++;
     lrect.y += lrect.h; // lrect.h should equal lineheight
