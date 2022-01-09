@@ -1,16 +1,5 @@
 #include "window.h"
 
-void window::loadfile(std::string filepath) {
-  if (!readfromfile(filepath)) {
-    return;
-  }
-  setvimlineletterwidth();
-  renderclear();
-  renderlines();
-  rendervimmode();
-  renderpresent();
-}
-
 bool window::readfromfile(std::string filepath) {
   this->filepath = filepath;
   std::ifstream file(filepath);
@@ -25,7 +14,7 @@ bool window::readfromfile(std::string filepath) {
       line l(1);
       lines.push_back(l);
     }
-    linenumdigits = log10(lines.size()) + 1;
+    linesizedigits = log10(lines.size()) + 1;
     file.close();
     return true;
   }
@@ -41,7 +30,7 @@ void window::writetofile() {
       file << text + '\n';
     }
     file.close();
-  } else {
-    std::cout << "Error writing back to file " << filepath << std::endl;
+    return;
   }
+  std::cout << "Error writing back to file " << filepath << std::endl;
 }

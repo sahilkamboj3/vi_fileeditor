@@ -20,69 +20,86 @@ public:
   void run();
 
 private:
-  // variables
-  SDL_Window *win;
-  SDL_Renderer *renderer;
-  int tabtospace = 4;
-  enum modetype { VISUAL, INSERT };
-  modetype mode = VISUAL;
+  typedef struct color {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+
+    color() : r(0), g(0), b(0), a(0) {}
+
+    color(int r, int g, int b, int a) {
+      this->r = r;
+      this->g = g;
+      this->b = b;
+      this->a = a;
+    }
+  } COLOR;
+
+  typedef enum mode { VISUAL, INSERT } MODE;
+
+  // new variables setup
+  std::string FONTNAME = "SpaceMono.ttf";
+  const char *FONT = stringtochar(FONTNAME);
+  const int FONTSIZE = 20;
+  const int TABTOSPACE = 4;
+  const COLOR WHITE{255, 255, 255, 255};
+  const COLOR DARKGREY{38, 38, 38, 255};
+  const COLOR RED{255, 0, 0, 255};
+  bool capslock = false, shiftdown = false;
+  // cursorindex indicates the letter user is on, startingletterrenderidx and
+  // startinglinerenderidx indicate index to start rendering the letter and line
+  int focuslineidx = 0, cursorindex = 0, startingletterrenderidx = 0,
+      startinglinerenderidx = 0;
+  int linesizedigits, numlinesonwindow;
+  int charsperline;
+  SDL_Window *win = NULL;
+  SDL_Renderer *renderer = NULL;
   std::vector<line> lines;
+  std::string filepath;
+  std::unordered_map<char, char> shift_x_pairs;
+  int windowwidth, windowheight;
+  int lineheight, letterwidth;
+  MODE mode;
+
   void destroy();
 
-  // window_file.cpp
-  std::string filepath;
-  int linenumdigits = 0;
-  bool readfromfile(std::string filepath);
-  void writetofile();
-
   // window_kb.cpp
-  bool capslock = false;
-  bool shiftdown = false;
-  std::unordered_map<char, char> shift_x_pairs;
+  void handlekbup(SDL_Event e);
   void handlekbdown(SDL_Event e);
   void handlekbdownvisualmode(SDL_Event e);
   void handlekbdowninsertmode(SDL_Event e);
-  void handlekbup(SDL_Event e);
-  void handletextinput(SDL_Event e);
-  void incrementlinefocus();
-  void decrementlinefocus();
-  std::string chartostring(const char *str);
-  const char *stringtochar(std::string str);
   char cleanchar(char c);
-
-  // window_render.cpp
-  int linerenderstartidx = 0;
-  int linesrendering = 0;
-  int focuslineidx = 0;
-  int letterrenderstartidx = 0;
-  int vimcursorstartidx = 0;
-  int focusletteridx = 0;
-  const char *myfont = stringtochar("SpaceMono.ttf");
-  int fontsize = 15;
-  void setlinerenderendidx();
-  void rendervimmode();
-  void renderclear();
-  void renderpresent();
-  void renderlines();
-  void rendercursor();
-  void renderemptyscreen();
-  void copysurfacetorenderer(SDL_Surface *surface, SDL_Rect *src,
-                             SDL_Rect *dest);
-  void blitsurface(SDL_Surface *src, SDL_Surface *dest);
+  void incrementfocusline();
+  void decrementfocusline();
 
   // window_window.cpp
-  int windowheight = 0;
-  int windowwidth = 0;
-  int vimbackgroundheight = 0;
-  int vimletterwidth = 0;
-  int vimlineletterwidth = 0;
-  void setvimbackgroundheight();
-  void setvimlineletterwidth();
-  void setwindowheightwidth();
   void centerwindow(float resize_relocate_ratio);
-  SDL_Surface *getwindowsurface();
-  void updatewindow();
   void resizewindow(int width, int height);
   void movewindow(int x, int y);
-  void setlinesrendering();
+  void setwindowwidthheight();
+  void setlineheightandletterwidth();
+  void setnumlinesonwindow();
+  void setcharsperline();
+
+  // window_render.cpp
+  void renderclear();
+  void renderpresent();
+  void renderemptyscreen();
+  void rendercursor();
+  void rendervimmode();
+  void renderlineletterslot();
+  void renderlines();
+  void copysurfacetorenderer(SDL_Surface *surface, SDL_Rect *src,
+                             SDL_Rect *dest);
+
+  // window_file.cpp
+  bool readfromfile(std::string filepath);
+  void writetofile();
+
+  // window_util.cpp
+  const char *stringtochar(std::string &str);
+  const char *inttochar(int num);
+  std::string chartostring(const char *cstr);
+  std::string inttostring(int num);
 };

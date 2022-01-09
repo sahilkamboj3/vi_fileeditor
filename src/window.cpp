@@ -30,7 +30,7 @@ void window::destroy() {
   writetofile();
   SDL_DestroyWindow(win);
   SDL_DestroyRenderer(renderer);
-  delete[] myfont;
+  // delete[] FONT;
   win = nullptr;
   renderer = nullptr;
 }
@@ -41,7 +41,7 @@ bool window::init() {
   int X_POS = 0;
   int Y_POS = 0;
 
-  win = SDL_CreateWindow("Text Editor", X_POS, Y_POS, WIDTH, HEIGHT,
+  win = SDL_CreateWindow("File Editor", X_POS, Y_POS, WIDTH, HEIGHT,
                          SDL_WINDOW_RESIZABLE);
   if (!win) {
     std::cout << "Creating window failed with error: " << SDL_GetError()
@@ -53,12 +53,24 @@ bool window::init() {
     std::cout << "Creating renderer failed with error: " << SDL_GetError()
               << std::endl;
   }
-  renderemptyscreen();
   centerwindow(0.75);
-  setwindowheightwidth();
-  setvimbackgroundheight();
-  setlinesrendering();
+  setwindowwidthheight();
+  setlineheightandletterwidth();
+  setnumlinesonwindow();
+  renderemptyscreen();
+  mode = VISUAL;
   return true;
+}
+
+void window::loadfile(std::string filepath) {
+  if (!readfromfile(filepath)) {
+    return;
+  }
+  setcharsperline();
+  renderclear();
+  renderlines();
+  rendervimmode();
+  renderpresent();
 }
 
 void window::run() {

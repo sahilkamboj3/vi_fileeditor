@@ -1,68 +1,133 @@
 #include "window.h"
 
+void window::renderclear() { SDL_RenderClear(renderer); }
+
+void window::renderpresent() { SDL_RenderPresent(renderer); }
+
+void window::renderemptyscreen() {
+  renderclear();
+  SDL_SetRenderDrawColor(renderer, DARKGREY.r, DARKGREY.g, DARKGREY.b,
+                         DARKGREY.a);
+  renderpresent();
+}
+
 void window::rendercursor() {
   SDL_Rect crect;
-  crect.x = ((linenumdigits + 1 + vimcursorstartidx) * vimletterwidth) + 5;
-  crect.y = focuslineidx * vimbackgroundheight;
-  crect.w = vimletterwidth; // w;
-  crect.h = vimbackgroundheight;
-  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+  crect.x = (linesizedigits + 2 + cursorindex) * letterwidth;
+  crect.y = focuslineidx * lineheight;
+  if (mode == VISUAL)
+    crect.w = letterwidth;
+  else
+    crect.w = letterwidth / 5;
+  crect.h = lineheight;
+  SDL_SetRenderDrawColor(renderer, RED.r, RED.g, RED.b, RED.a);
   SDL_RenderFillRect(renderer, &crect);
 }
 
-void window::renderlines() {
-  if (!lines.size()) {
-    renderemptyscreen();
+void window::rendervimmode() {
+  TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
+  SDL_Rect lrect;
+  lrect.x = letterwidth;
+  lrect.y = windowheight - lineheight;
+  // lrect.w = windowwidth - (2 * letterwidth);
+  std::string text;
+  const char *cleanedtext;
+  if (mode == VISUAL) {
+    // cleanedtext = stringtochar("VISUAL");
+    text = "VISUAL";
+  } else {
+    // cleanedtext = stringtochar("INSERT");
+    text = "INSERT";
+  }
+  cleanedtext = stringtochar(text);
+  SDL_Surface *textsurface = TTF_RenderText_Blended(
+      font, cleanedtext,
+      (SDL_Color){RED.r, RED.g, RED.b, RED.a}); // create text surface
+  if (!textsurface) {
+    std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
     return;
   }
+  SDL_SetRenderDrawColor(renderer, DARKGREY.r, DARKGREY.g, DARKGREY.b,
+                         DARKGREY.a);
+  SDL_RenderFillRect(renderer, &lrect);
+  copysurfacetorenderer(textsurface, NULL, &lrect);
+  // delete[] cleanedtext;
+  TTF_CloseFont(font);
+}
 
+void window::renderlineletterslot() {
+  TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
+  std::string text = inttostring(startinglinerenderidx + focuslineidx + 1) +
+                     "," +
+                     inttostring(startingletterrenderidx + cursorindex + 1);
+  SDL_Rect lrect;
+  lrect.x = windowwidth - ((text.size() + 1) * letterwidth);
+  lrect.y = windowheight - lineheight;
+  const char *cleanedtext = stringtochar(text);
+  SDL_Surface *textsurface = TTF_RenderText_Blended(
+      font, cleanedtext,
+      (SDL_Color){RED.r, RED.g, RED.b, RED.a}); // create text surface
+  if (!textsurface) {
+    std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
+    return;
+  }
+  SDL_SetRenderDrawColor(renderer, DARKGREY.r, DARKGREY.g, DARKGREY.b,
+                         DARKGREY.a);
+  SDL_RenderFillRect(renderer, &lrect);
+  copysurfacetorenderer(textsurface, NULL, &lrect);
+  // delete[] cleanedtext;
+  TTF_CloseFont(font);
+}
+
+void window::renderlines() {
   rendercursor();
 
-  TTF_Font *font = TTF_OpenFont(myfont, fontsize);
-  SDL_Color white = {255, 255, 255, 255};
-
-  SDL_Rect lnrect;
-  lnrect.x = 5;
+  // set up SDL_Rect for line and line numbers
+  TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
+  SDL_Rect lnrect, lrect;
+  lnrect.x = letterwidth;
   lnrect.y = 0;
+  lnrect.w = linesizedigits * letterwidth;
+  lnrect.h = lineheight;
 
-  SDL_Rect lrect;
-  lrect.x = (linenumdigits + 1) * vimletterwidth + lnrect.x;
+  lrect.x = (1 + linesizedigits + 1) * letterwidth;
   lrect.y = 0;
+  // lrect.w = windowwidth - ((linesizedigits + 3) * letterwidth);
+  lrect.h = lineheight;
 
-  int w;
-  SDL_GetWindowSize(win, &w, NULL);
   int lineidx = 0;
   int endidx;
-  if (linerenderstartidx || (lines.size() > linesrendering)) {
-    endidx = linerenderstartidx + linesrendering;
+  // check this
+  if (startinglinerenderidx || (lines.size() > numlinesonwindow)) {
+    endidx = startinglinerenderidx + numlinesonwindow;
   } else {
     endidx = lines.size();
   }
 
-  for (int i = linerenderstartidx; i < endidx; i++) {
-    // std::string text = lines[i].gettext();
-    std::string text =
-        lines[i].gettext(letterrenderstartidx, vimlineletterwidth);
-
+  for (int i = startinglinerenderidx; i < endidx; i++) {
     // handle line number
     int linenum = lines[i].getlinenum();
-    std::string linenumstr = std::to_string(linenum);
-    const char *cleanedlinenum = stringtochar(linenumstr);
+    // std::string linenumstr = std::to_string(linenum);
+    const char *cleanedlinenum = inttochar(linenum);
     SDL_Surface *lnsurface = TTF_RenderText_Blended(
-        font, cleanedlinenum, white); // create text surface
+        font, cleanedlinenum,
+        (SDL_Color){WHITE.r, WHITE.g, WHITE.b, WHITE.a}); // create text surface
     if (!lnsurface) {
       std::cout << "Error loading line number surface: " << SDL_GetError()
                 << std::endl;
       return;
     }
     copysurfacetorenderer(lnsurface, NULL, &lnrect);
-    delete[] cleanedlinenum;
+    // delete[] cleanedlinenum;
 
+    // handle text
+    std::string text = lines[i].gettext(startingletterrenderidx, charsperline);
     if (text.size() > 0) {
-      // handle text
       const char *cleanedtext = stringtochar(text);
-      SDL_Surface *textsurface = TTF_RenderText_Blended(
-          font, cleanedtext, white); // create text surface
+      SDL_Surface *textsurface =
+          TTF_RenderText_Blended(font, cleanedtext,
+                                 (SDL_Color){WHITE.r, WHITE.g, WHITE.b,
+                                             WHITE.a}); // create text surface
       if (!textsurface) {
         std::cout << "Error loading text surface: " << SDL_GetError()
                   << std::endl;
@@ -70,41 +135,15 @@ void window::renderlines() {
       }
 
       copysurfacetorenderer(textsurface, NULL, &lrect);
-      delete[] cleanedtext;
+      // delete[] cleanedtext;
     }
     lineidx++;
-    lrect.y += lrect.h;
+    lrect.y += lrect.h; // lrect.h should equal lineheight
     lnrect.y += lrect.h;
   }
   TTF_CloseFont(font);
-}
 
-void window::rendervimmode() {
-  TTF_Font *font = TTF_OpenFont(myfont, fontsize);
-  SDL_Color red = {255, 0, 0, 255};
-  SDL_Rect lrect;
-  int w, h;
-  SDL_GetWindowSize(win, &w, &h);
-  lrect.x = 0;
-  lrect.y = h - vimbackgroundheight;
-  const char *cleanedtext;
-  if (mode == VISUAL) {
-    cleanedtext = stringtochar("VISUAL");
-  } else {
-    cleanedtext = stringtochar("INSERT");
-  }
-  SDL_Surface *textsurface =
-      TTF_RenderText_Blended(font, cleanedtext, red); // create text surface
-  if (!textsurface) {
-    std::cout << "Error loading text surface: " << SDL_GetError() << std::endl;
-    return;
-  }
-  SDL_SetRenderDrawColor(renderer, 38, 38, 38, 255);
-  lrect.w = w;
-  SDL_RenderFillRect(renderer, &lrect);
-  copysurfacetorenderer(textsurface, NULL, &lrect);
-  delete[] cleanedtext;
-  TTF_CloseFont(font);
+  renderlineletterslot();
 }
 
 void window::copysurfacetorenderer(SDL_Surface *surface, SDL_Rect *src,
@@ -119,16 +158,8 @@ void window::copysurfacetorenderer(SDL_Surface *surface, SDL_Rect *src,
   SDL_DestroyTexture(texture);
 }
 
-void window::renderclear() { SDL_RenderClear(renderer); }
-
-void window::renderpresent() { SDL_RenderPresent(renderer); }
-
-void window::renderemptyscreen() {
-  SDL_RenderClear(renderer);
-  SDL_SetRenderDrawColor(renderer, 38, 38, 38, 255); // darkgrey
-  SDL_RenderPresent(renderer);
-}
-
+/*
 void window::blitsurface(SDL_Surface *src, SDL_Surface *dest) {
   SDL_BlitSurface(src, NULL, dest, NULL);
 }
+*/
