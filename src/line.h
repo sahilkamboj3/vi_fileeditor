@@ -17,6 +17,7 @@ public:
   std::string gettext();
   std::string gettext(int start);
   std::string gettext(int start, int length);
+  line &operator=(const line &other);
 
 private:
   std::string text;

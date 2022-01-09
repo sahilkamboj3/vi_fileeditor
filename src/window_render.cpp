@@ -52,10 +52,10 @@ void window::rendervimmode() {
 
 void window::renderlineletterslot() {
   TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
-  std::string text = getfilenamefromfilepath(filepath) + ":" +
-                     inttostring(startinglinerenderidx + focuslineidx + 1) +
-                     "," +
-                     inttostring(startingletterrenderidx + cursorindex + 1);
+  std::string text =
+      userinputs + " " + getfilenamefromfilepath(filepath) + ":" +
+      inttostring(startinglinerenderidx + focuslineidx + 1) + "," +
+      inttostring(startingletterrenderidx + cursorindex + 1);
   SDL_Rect lrect;
   lrect.x = windowwidth - ((text.size() + 1) * letterwidth);
   lrect.y = windowheight - lineheight;
@@ -75,6 +75,7 @@ void window::renderlineletterslot() {
 
 void window::renderlines() {
   linesizedigits = getnumdigits(lines.size());
+  setcharsperline();
   rendercursor();
 
   // set up SDL_Rect for line and line numbers

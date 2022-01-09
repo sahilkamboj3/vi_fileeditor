@@ -30,3 +30,8 @@ std::string line::gettext(int start, int length) {
     return "";
   return text.substr(start, length);
 }
+
+line &line::operator=(const line &other) {
+  text = other.text;
+  return *this;
+}

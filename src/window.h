@@ -20,6 +20,7 @@ public:
   void run();
 
 private:
+  /*
   typedef struct color {
     uint8_t r;
     uint8_t g;
@@ -35,6 +36,7 @@ private:
       this->a = a;
     }
   } COLOR;
+  */
 
   typedef enum mode { VISUAL, INSERT } MODE;
 
@@ -65,6 +67,8 @@ private:
   int windowwidth, windowheight;
   int lineheight, letterwidth;
   MODE mode;
+  std::string userinputs;
+  line cpline;
 
   void destroy();
 
@@ -76,6 +80,8 @@ private:
   char cleanchar(char c);
   void incrementfocusline();
   void decrementfocusline();
+  bool handleshiftplusxkeys(char c);
+  void handleuserinput(char c); // for handling multiple char vim commands
 
   // window_window.cpp
   void centerwindow(float resize_relocate_ratio);
