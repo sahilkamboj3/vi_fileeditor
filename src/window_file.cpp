@@ -14,7 +14,7 @@ bool window::readfromfile(std::string filepath) {
       line l(1);
       lines.push_back(l);
     }
-    linesizedigits = log10(lines.size()) + 1;
+    linesizedigits = getnumdigits(lines.size());
     file.close();
     return true;
   }

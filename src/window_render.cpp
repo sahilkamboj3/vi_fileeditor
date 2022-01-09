@@ -57,7 +57,8 @@ void window::rendervimmode() {
 
 void window::renderlineletterslot() {
   TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
-  std::string text = inttostring(startinglinerenderidx + focuslineidx + 1) +
+  std::string text = getfilenamefromfilepath(filepath) + ":" +
+                     inttostring(startinglinerenderidx + focuslineidx + 1) +
                      "," +
                      inttostring(startingletterrenderidx + cursorindex + 1);
   SDL_Rect lrect;
@@ -80,6 +81,7 @@ void window::renderlineletterslot() {
 }
 
 void window::renderlines() {
+  linesizedigits = getnumdigits(lines.size());
   rendercursor();
 
   // set up SDL_Rect for line and line numbers
@@ -106,7 +108,8 @@ void window::renderlines() {
 
   for (int i = startinglinerenderidx; i < endidx; i++) {
     // handle line number
-    int linenum = lines[i].getlinenum();
+    // int linenum = lines[i].getlinenum();
+    int linenum = i + 1;
     // std::string linenumstr = std::to_string(linenum);
     const char *cleanedlinenum = inttochar(linenum);
     SDL_Surface *lnsurface = TTF_RenderText_Blended(

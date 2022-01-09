@@ -92,6 +92,18 @@ void window::handlekbdownvisualmode(SDL_Event e) {
       cursorindex = (int)text.size() - startingletterrenderidx;
     }
     return;
+  } else if (!shiftdown && c == 'O') {
+    mode = INSERT;
+    line l(startinglinerenderidx + focuslineidx + 2);
+    lines.insert(lines.begin() + startinglinerenderidx + focuslineidx + 1, l);
+    if (focuslineidx == numlinesonwindow - 1)
+      startinglinerenderidx++;
+    else
+      focuslineidx++;
+  } else if (shiftdown && c == 'O') {
+    mode = INSERT;
+    line l(0);
+    lines.insert(lines.begin() + startinglinerenderidx + focuslineidx - 1, l);
   }
 
   std::string text = lines[startinglinerenderidx + focuslineidx].gettext();

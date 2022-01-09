@@ -102,4 +102,6 @@ private:
   const char *inttochar(int num);
   std::string chartostring(const char *cstr);
   std::string inttostring(int num);
+  std::string getfilenamefromfilepath(std::string filepath);
+  int getnumdigits(int num);
 };

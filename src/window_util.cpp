@@ -19,3 +19,14 @@ const char *window::inttochar(int num) {
   const char *cleanednum = stringtochar(numstr);
   return cleanednum;
 }
+
+std::string window::getfilenamefromfilepath(std::string filepath) {
+  size_t pos = filepath.size() - 1;
+  char SLASH = '/';
+  while (pos && filepath[pos] != SLASH) {
+    pos--;
+  }
+  return filepath.substr(pos + 1);
+}
+
+int window::getnumdigits(int num) { return log10(num) + 1; }
