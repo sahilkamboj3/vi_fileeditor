@@ -21,6 +21,14 @@ void window::handlekbdownvisualmode(SDL_Event e) {
   char c = *SDL_GetKeyName(e.key.keysym.sym);
 
   switch (e.key.keysym.sym) {
+    /*
+case SDLK_RETURN:
+case SDLK_KP_ENTER:
+  handleuserinput(' ', false);
+  userinputs = "";
+  // break;
+  return;
+  */
   case SDLK_LSHIFT:
   case SDLK_RSHIFT:
     shiftdown = true;
@@ -29,6 +37,8 @@ void window::handlekbdownvisualmode(SDL_Event e) {
     cursorindex = 0;
     startingletterrenderidx = 0;
     return;
+  case SDLK_RETURN:
+  case SDLK_KP_ENTER:
   case SDLK_ESCAPE:
     userinputs = "";
     return;
@@ -92,60 +102,75 @@ void window::handlekbdownvisualmode(SDL_Event e) {
     mode = INSERT;
     return;
   }
+  case 'P': {
+    if (cpline.gettext().size()) {
+      line l = cpline;
+      lines.insert(lines.begin() + startinglinerenderidx + focuslineidx + 1, l);
+      if (focuslineidx == numlinesonwindow - 1) {
+        startinglinerenderidx++;
+      } else {
+        focuslineidx++;
+      }
+    }
+    break;
+  }
   default: {
     if (!handleshiftplusxkeys(c)) {
       if (shiftdown)
-        handleuserinput(toupper(c));
+        if (shift_x_pairs.find(c) != shift_x_pairs.end())
+          handleuserinput(shift_x_pairs[c], true);
+        else
+          handleuserinput(toupper(c), true);
       else
-        handleuserinput(tolower(c));
+        handleuserinput(tolower(c), true);
     }
     // return;
   }
   }
 
-  std::string text = lines[startinglinerenderidx + focuslineidx].gettext();
-  if (text.size() == 0) {
-    cursorindex = 0;
-    startingletterrenderidx = 0;
-  } else if (startingletterrenderidx + cursorindex >= text.size()) {
-    if (startingletterrenderidx >= text.size())
-      startingletterrenderidx = std::max(0, (int)text.size() - charsperline);
-    cursorindex =
-        std::min((int)text.size() - startingletterrenderidx - 1, charsperline);
+  if (mode == VISUAL) { // have this because shift+a changes to INSERT mode
+    std::string text = lines[startinglinerenderidx + focuslineidx].gettext();
+    if (text.size() == 0) {
+      cursorindex = 0;
+      startingletterrenderidx = 0;
+    } else if (startingletterrenderidx + cursorindex >= text.size()) {
+      if (startingletterrenderidx >= text.size())
+        startingletterrenderidx = std::max(0, (int)text.size() - charsperline);
+      cursorindex = std::min((int)text.size() - startingletterrenderidx - 1,
+                             charsperline);
+    }
   }
 }
 
-void window::handleuserinput(char c) {
+void window::handleuserinput(char c, bool insert) {
+  if (insert)
+    userinputs += c;
   bool status = false;
-  userinputs += c;
   if (userinputs.size() > 1) {
-    /*
-  if (userinputs == "dd") {
-    lines.erase(lines.begin() + startinglinerenderidx + focuslineidx,
-                lines.begin() + startinglinerenderidx + focuslineidx + 1);
-    if (startinglinerenderidx + focuslineidx == lines.size()) {
-      if (startinglinerenderidx)
-        startinglinerenderidx--;
-      else
-        decrementfocusline();
-    }
-    if (lines.size() == 0) {
-      line l;
-      lines.push_back(l);
-    }
-    status = true;
-    */
-    /*} else*/
-    if (userinputs == "gg") {
+    if (userinputs == "dd") {
+      lines.erase(lines.begin() + startinglinerenderidx + focuslineidx);
+      if (startinglinerenderidx + focuslineidx == lines.size()) {
+        if (startinglinerenderidx)
+          startinglinerenderidx--;
+        else
+          decrementfocusline();
+      }
+      if (lines.size() == 0) {
+        line l;
+        lines.push_back(l);
+      }
+      status = true;
+    } else if (userinputs == "gg") {
       cursorindex = 0;
       startinglinerenderidx = 0;
       focuslineidx = 0;
       startingletterrenderidx = 0;
       status = true;
     } else if (userinputs == "yy") {
-      // std::cout << "need to copy" << std::endl;
       cpline = lines[startinglinerenderidx + focuslineidx];
-      // std::cout << cpline.gettext() << std::endl;
+      status = true;
+    } else if (userinputs == ":w") {
+      writetofile();
       status = true;
     }
   }
@@ -166,7 +191,6 @@ bool window::handleshiftplusxkeys(char c) {
     }
     status = true;
   } else if (!shiftdown && c == 'O') {
-    // } else if (c == 'o') {
     mode = INSERT;
     line l;
     lines.insert(lines.begin() + startinglinerenderidx + focuslineidx + 1, l);
@@ -174,6 +198,8 @@ bool window::handleshiftplusxkeys(char c) {
       startinglinerenderidx++;
     else
       focuslineidx++;
+    cursorindex = 0;
+    startingletterrenderidx = 0;
     status = true;
   } else if (shiftdown && c == 'O') {
     mode = INSERT;
@@ -183,6 +209,8 @@ bool window::handleshiftplusxkeys(char c) {
       startinglinerenderidx++;
       focuslineidx = numlinesonwindow - 2;
     }
+    cursorindex = 0;
+    startingletterrenderidx = 0;
     status = true;
   } else if (shiftdown && c == 'G') {
     startinglinerenderidx = std::max(0, (int)lines.size() - numlinesonwindow);
@@ -219,7 +247,7 @@ void window::handlekbdowninsertmode(SDL_Event e) {
       cs += " ";
     break;
   case SDLK_CAPSLOCK:
-    capslock = !capslock;
+    setcapslock();
     return;
   case SDLK_SPACE:
     c = ' ';

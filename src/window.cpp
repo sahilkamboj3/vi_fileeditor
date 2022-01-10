@@ -53,12 +53,14 @@ bool window::init() {
     std::cout << "Creating renderer failed with error: " << SDL_GetError()
               << std::endl;
   }
-  centerwindow(0.75);
+  centerwindow(0.9);
   setwindowwidthheight();
   setlineheightandletterwidth();
   setnumlinesonwindow();
   renderemptyscreen();
+  setcapslock();
   mode = VISUAL;
+
   return true;
 }
 
@@ -82,16 +84,30 @@ void window::run() {
       case SDL_QUIT:
         quit = true;
         break;
-      case SDL_KEYUP:
+      case SDL_KEYUP: {
+        uint32_t begin = SDL_GetTicks();
         handlekbup(e);
+        uint32_t end = SDL_GetTicks();
+        if (end - begin < (1000 / GOLDFPS)) {
+          SDL_Delay((1000 / GOLDFPS) - (end - begin));
+        }
         break;
-      case SDL_KEYDOWN:
+      }
+      case SDL_KEYDOWN: {
+        uint32_t begin = SDL_GetTicks();
         handlekbdown(e);
         renderclear();
         renderlines();
         rendervimmode();
         renderpresent();
+        uint32_t end = SDL_GetTicks();
+        if (end - begin < (1000 / GOLDFPS)) {
+          SDL_Delay((1000 / GOLDFPS) - (end - begin));
+        }
         break;
+      }
+      default:
+        SDL_Delay(1000 / GOLDFPS);
       }
     }
   }

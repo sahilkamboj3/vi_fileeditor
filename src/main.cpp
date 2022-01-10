@@ -10,8 +10,7 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
   // resizing window because rect dimensions not retrievable in createwindow()
-  w.loadfile("build/debug/in.txt");
-  // w.loadfile("build/debug/in.py");
+  w.loadfile(argv[argc - 1]);
   w.run();
   sdl_quit();
 

@@ -43,7 +43,7 @@ private:
   // new variables setup
   std::string FONTNAME = "SpaceMono.ttf";
   const char *FONT = stringtochar(FONTNAME);
-  const int FONTSIZE = 20;
+  const int FONTSIZE = 15;
   const int TABTOSPACE = 4;
   // const COLOR WHITE{255, 255, 255, 255};
   // const COLOR DARKGREY{38, 38, 38, 255};
@@ -51,8 +51,8 @@ private:
   SDL_Color WHITE = {255, 255, 255, 255};
   SDL_Color DARKGREY = {38, 38, 38, 255};
   SDL_Color RED = {255, 0, 0, 255};
-
-  bool capslock = false, shiftdown = false;
+  int GOLDFPS = 60;
+  bool capslock, shiftdown = false;
   // cursorindex indicates the letter user is on, startingletterrenderidx and
   // startinglinerenderidx indicate index to start rendering the letter and line
   int focuslineidx = 0, cursorindex = 0, startingletterrenderidx = 0,
@@ -81,7 +81,8 @@ private:
   void incrementfocusline();
   void decrementfocusline();
   bool handleshiftplusxkeys(char c);
-  void handleuserinput(char c); // for handling multiple char vim commands
+  void handleuserinput(char c,
+                       bool insert); // for handling multiple char vim commands
 
   // window_window.cpp
   void centerwindow(float resize_relocate_ratio);
@@ -114,4 +115,5 @@ private:
   std::string inttostring(int num);
   std::string getfilenamefromfilepath(std::string filepath);
   int getnumdigits(int num);
+  void setcapslock();
 };

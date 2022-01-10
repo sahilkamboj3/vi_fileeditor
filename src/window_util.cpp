@@ -25,3 +25,10 @@ std::string window::getfilenamefromfilepath(std::string filepath) {
 }
 
 int window::getnumdigits(int num) { return log10(num) + 1; }
+
+void window::setcapslock() {
+  if ((SDL_GetModState() & KMOD_CAPS) == KMOD_CAPS)
+    capslock = true;
+  else
+    capslock = false;
+}
