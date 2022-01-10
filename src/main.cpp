@@ -10,9 +10,9 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
   // resizing window because rect dimensions not retrievable in createwindow()
-  w.centerwindow(0.75);
-  w.loadfile("build/debug/in.txt");
+  w.loadfile(argv[argc - 1]);
   w.run();
   sdl_quit();
-  return 0;
+
+  return EXIT_SUCCESS;
 }

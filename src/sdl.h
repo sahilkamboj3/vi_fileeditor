@@ -4,7 +4,7 @@
 #include <iostream>
 
 bool sdl_init() {
-  if (SDL_Init(SDL_INIT_AUDIO)) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
     std::cout << "SDL_Init failed with error: " << SDL_GetError() << std::endl;
     return false;
   }
@@ -16,7 +16,6 @@ bool sdl_init() {
     std::cout << "TTF_Init failed with error: " << TTF_GetError() << std::endl;
     return false;
   }
-  SDL_StartTextInput();
   return true;
 }
 

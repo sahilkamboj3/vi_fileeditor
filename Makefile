@@ -1,5 +1,5 @@
 CC = g++
-COMPILER_FLAGS = -std=c++11 -Wall -O0 -g
+COMPILER_FLAGS = -std=c++11 -Wall -pedantic -O0 -g
 LINKER_FLAGS = -lsdl2 -lsdl2_image -lsdl2_ttf
 INCLUDE_PATHS = -Iinclude
 LIBRARY_PATHS = -Llib
