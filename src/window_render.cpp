@@ -4,11 +4,25 @@ void window::renderclear() { SDL_RenderClear(renderer); }
 
 void window::renderpresent() { SDL_RenderPresent(renderer); }
 
+void window::renderscreen() {
+  renderclear();
+  renderbackground();
+  renderlines();
+  renderlineletterslot();
+  rendervimmode();
+  rendercursor();
+  renderpresent();
+}
+
 void window::renderemptyscreen() {
   renderclear();
+  renderbackground();
+  renderpresent();
+}
+
+void window::renderbackground() {
   SDL_SetRenderDrawColor(renderer, DARKGREY.r, DARKGREY.g, DARKGREY.b,
                          DARKGREY.a);
-  renderpresent();
 }
 
 void window::rendercursor() {
@@ -28,7 +42,7 @@ void window::rendervimmode() {
   TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
   SDL_Rect lrect;
   lrect.x = letterwidth;
-  lrect.y = windowheight - lineheight;
+  lrect.y = WINDOW_HEIGHT - lineheight;
   std::string text;
   const char *cleanedtext;
   if (mode == VISUAL) {
@@ -57,8 +71,8 @@ void window::renderlineletterslot() {
       inttostring(startinglinerenderidx + focuslineidx + 1) + "," +
       inttostring(startingletterrenderidx + cursorindex + 1);
   SDL_Rect lrect;
-  lrect.x = windowwidth - ((text.size() + 1) * letterwidth);
-  lrect.y = windowheight - lineheight;
+  lrect.x = WINDOW_WIDTH - ((text.size() + 1) * letterwidth);
+  lrect.y = WINDOW_HEIGHT - lineheight;
   const char *cleanedtext = stringtochar(text);
   SDL_Surface *textsurface = TTF_RenderText_Blended(font, cleanedtext,
                                                     RED); // create text surface
