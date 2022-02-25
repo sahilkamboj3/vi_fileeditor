@@ -4,16 +4,18 @@ bool window::readfromfile(std::string filepath) {
   this->filepath = filepath;
   std::ifstream file(filepath);
   std::string fline;
+
   if (file.is_open()) {
     while (getline(file, fline)) {
       line l(fline);
       lines.push_back(l);
     }
-    if (!lines.size()) {
-      line l;
+    if (!lines.size()) { // no lines
+      line l;            // set default line
       lines.push_back(l);
     }
-    linesizedigits = getnumdigits(lines.size());
+
+    numlinedigits = getnumdigits(lines.size());
     file.close();
     return true;
   }

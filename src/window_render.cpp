@@ -13,7 +13,7 @@ void window::renderemptyscreen() {
 
 void window::rendercursor() {
   SDL_Rect crect;
-  crect.x = (linesizedigits + 2 + cursorindex) * letterwidth;
+  crect.x = (numlinedigits + 2 + cursorindex) * letterwidth;
   crect.y = focuslineidx * lineheight;
   if (mode == VISUAL)
     crect.w = letterwidth;
@@ -74,7 +74,7 @@ void window::renderlineletterslot() {
 }
 
 void window::renderlines() {
-  linesizedigits = getnumdigits(lines.size());
+  numlinedigits = getnumdigits(lines.size());
   setcharsperline();
   rendercursor();
 
@@ -83,10 +83,10 @@ void window::renderlines() {
   SDL_Rect lnrect, lrect;
   lnrect.x = letterwidth;
   lnrect.y = 0;
-  lnrect.w = linesizedigits * letterwidth;
+  lnrect.w = numlinedigits * letterwidth;
   lnrect.h = lineheight;
 
-  lrect.x = (1 + linesizedigits + 1) * letterwidth;
+  lrect.x = (1 + numlinedigits + 1) * letterwidth;
   lrect.y = 0;
   lrect.h = lineheight;
 

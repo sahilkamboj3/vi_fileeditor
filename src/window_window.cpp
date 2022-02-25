@@ -40,25 +40,15 @@ void window::setlineheightandletterwidth() {
   SDL_FreeSurface(textsurface);
   SDL_DestroyTexture(texture);
 }
-// subtract 4 because first 3 slots taken for rendering line number and
+
+// subtract 3 because first 3 slots taken for rendering line number and
 // last slot empty to have 1 empty slot on each side
-// [E,LN,E,....E]
+// [E,LN,T,T,...E]
 void window::setcharsperline() {
-  charsperline = (windowwidth / letterwidth) - (linesizedigits + 3);
+  charsperline = (windowwidth / letterwidth) - (numlinedigits + 3);
 }
 
 void window::setnumlinesonwindow() {
   numlinesonwindow = (windowheight / lineheight) -
                      2; // to leave space at the bottom to render the vim mode
 }
-
-/*
-void window::setvimlineletterwidth() {
-  vimlineletterwidth = (windowwidth / vimletterwidth) - (linesizedigits + 1) -
-                       2; // how many letters fit in a line
-}
-
-SDL_Surface *window::getwindowsurface() { return SDL_GetWindowSurface(win); }
-
-void window::updatewindow() { SDL_UpdateWindowSurface(win); }
-*/

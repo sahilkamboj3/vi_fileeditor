@@ -16,28 +16,10 @@ public:
   window();
   ~window();
   bool init();
-  void loadfile(std::string filepath);
+  bool loadfile(std::string filepath);
   void run();
 
 private:
-  /*
-  typedef struct color {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
-
-    color() : r(0), g(0), b(0), a(0) {}
-
-    color(int r, int g, int b, int a) {
-      this->r = r;
-      this->g = g;
-      this->b = b;
-      this->a = a;
-    }
-  } COLOR;
-  */
-
   typedef enum mode { VISUAL, INSERT } MODE;
 
   // new variables setup
@@ -45,19 +27,14 @@ private:
   const char *FONT = stringtochar(FONTNAME);
   const int FONTSIZE = 15;
   const int TABTOSPACE = 4;
-  // const COLOR WHITE{255, 255, 255, 255};
-  // const COLOR DARKGREY{38, 38, 38, 255};
-  // const COLOR RED{255, 0, 0, 255};
   SDL_Color WHITE = {255, 255, 255, 255};
   SDL_Color DARKGREY = {38, 38, 38, 255};
   SDL_Color RED = {255, 0, 0, 255};
   int GOLDFPS = 60;
   bool capslock, shiftdown = false;
-  // cursorindex indicates the letter user is on, startingletterrenderidx and
-  // startinglinerenderidx indicate index to start rendering the letter and line
   int focuslineidx = 0, cursorindex = 0, startingletterrenderidx = 0,
       startinglinerenderidx = 0;
-  int linesizedigits, numlinesonwindow;
+  int numlinedigits, numlinesonwindow;
   int charsperline;
   SDL_Window *win = NULL;
   SDL_Renderer *renderer = NULL;

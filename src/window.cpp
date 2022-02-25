@@ -36,13 +36,11 @@ void window::destroy() {
 }
 
 bool window::init() {
-  int WIDTH = 640;
-  int HEIGHT = 480;
   int X_POS = 0;
   int Y_POS = 0;
 
-  win = SDL_CreateWindow("File Editor", X_POS, Y_POS, WIDTH, HEIGHT,
-                         SDL_WINDOW_RESIZABLE);
+  win = SDL_CreateWindow("File Editor", X_POS, Y_POS, WINDOW_WIDTH,
+                         WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
   if (!win) {
     std::cout << "Creating window failed with error: " << SDL_GetError()
               << std::endl;
@@ -52,6 +50,7 @@ bool window::init() {
   if (!renderer) {
     std::cout << "Creating renderer failed with error: " << SDL_GetError()
               << std::endl;
+    return false;
   }
   centerwindow(0.9);
   setwindowwidthheight();
@@ -64,15 +63,16 @@ bool window::init() {
   return true;
 }
 
-void window::loadfile(std::string filepath) {
-  if (!readfromfile(filepath)) {
-    return;
-  }
-  setcharsperline();
-  renderclear();
-  renderlines();
-  rendervimmode();
-  renderpresent();
+bool window::loadfile(std::string filepath) {
+  return readfromfile(filepath);
+  // if (!readfromfile(filepath)) {
+  // return;
+  // }
+  // setcharsperline();
+  // renderclear();
+  // renderlines();
+  // rendervimmode();
+  // renderpresent();
 }
 
 void window::run() {
