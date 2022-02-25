@@ -4,16 +4,30 @@ void window::renderclear() { SDL_RenderClear(renderer); }
 
 void window::renderpresent() { SDL_RenderPresent(renderer); }
 
+void window::renderscreen() {
+  renderclear();
+  renderbackground();
+  renderlines();
+  renderlineletterslot();
+  rendervimmode();
+  rendercursor();
+  renderpresent();
+}
+
 void window::renderemptyscreen() {
   renderclear();
+  renderbackground();
+  renderpresent();
+}
+
+void window::renderbackground() {
   SDL_SetRenderDrawColor(renderer, DARKGREY.r, DARKGREY.g, DARKGREY.b,
                          DARKGREY.a);
-  renderpresent();
 }
 
 void window::rendercursor() {
   SDL_Rect crect;
-  crect.x = (linesizedigits + 2 + cursorindex) * letterwidth;
+  crect.x = (numlinedigits + 2 + cursorindex) * letterwidth;
   crect.y = focuslineidx * lineheight;
   if (mode == VISUAL)
     crect.w = letterwidth;
@@ -28,7 +42,7 @@ void window::rendervimmode() {
   TTF_Font *font = TTF_OpenFont(FONT, FONTSIZE);
   SDL_Rect lrect;
   lrect.x = letterwidth;
-  lrect.y = windowheight - lineheight;
+  lrect.y = WINDOW_HEIGHT - lineheight;
   std::string text;
   const char *cleanedtext;
   if (mode == VISUAL) {
@@ -57,8 +71,8 @@ void window::renderlineletterslot() {
       inttostring(startinglinerenderidx + focuslineidx + 1) + "," +
       inttostring(startingletterrenderidx + cursorindex + 1);
   SDL_Rect lrect;
-  lrect.x = windowwidth - ((text.size() + 1) * letterwidth);
-  lrect.y = windowheight - lineheight;
+  lrect.x = WINDOW_WIDTH - ((text.size() + 1) * letterwidth);
+  lrect.y = WINDOW_HEIGHT - lineheight;
   const char *cleanedtext = stringtochar(text);
   SDL_Surface *textsurface = TTF_RenderText_Blended(font, cleanedtext,
                                                     RED); // create text surface
@@ -74,7 +88,7 @@ void window::renderlineletterslot() {
 }
 
 void window::renderlines() {
-  linesizedigits = getnumdigits(lines.size());
+  numlinedigits = getnumdigits(lines.size());
   setcharsperline();
   rendercursor();
 
@@ -83,10 +97,10 @@ void window::renderlines() {
   SDL_Rect lnrect, lrect;
   lnrect.x = letterwidth;
   lnrect.y = 0;
-  lnrect.w = linesizedigits * letterwidth;
+  lnrect.w = numlinedigits * letterwidth;
   lnrect.h = lineheight;
 
-  lrect.x = (1 + linesizedigits + 1) * letterwidth;
+  lrect.x = (1 + numlinedigits + 1) * letterwidth;
   lrect.y = 0;
   lrect.h = lineheight;
 

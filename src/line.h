@@ -9,6 +9,7 @@ public:
   line(std::string text);
   void addchar(char &c);
   void addchar(char &c, size_t idx);
+  void addchar(const char *c, size_t idx);
   void addstr(std::string &s);
   void addstr(std::string &s, size_t idx);
   void popchar();
@@ -18,6 +19,7 @@ public:
   std::string gettext(int start);
   std::string gettext(int start, int length);
   line &operator=(const line &other);
+  std::string chartostring(const char *cstr);
 
 private:
   std::string text;

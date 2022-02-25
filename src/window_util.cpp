@@ -11,8 +11,7 @@ std::string window::inttostring(int num) { return std::to_string(num); }
 
 const char *window::inttochar(int num) {
   std::string numstr = std::to_string(num);
-  const char *cleanednum = stringtochar(numstr);
-  return cleanednum;
+  return stringtochar(numstr);
 }
 
 std::string window::getfilenamefromfilepath(std::string filepath) {
@@ -25,10 +24,3 @@ std::string window::getfilenamefromfilepath(std::string filepath) {
 }
 
 int window::getnumdigits(int num) { return log10(num) + 1; }
-
-void window::setcapslock() {
-  if ((SDL_GetModState() & KMOD_CAPS) == KMOD_CAPS)
-    capslock = true;
-  else
-    capslock = false;
-}

@@ -4,25 +4,6 @@
 window::window() {
   win = nullptr;
   renderer = nullptr;
-  shift_x_pairs['1'] = '!';
-  shift_x_pairs['2'] = '@';
-  shift_x_pairs['3'] = '#';
-  shift_x_pairs['4'] = '$';
-  shift_x_pairs['5'] = '%';
-  shift_x_pairs['6'] = '^';
-  shift_x_pairs['7'] = '&';
-  shift_x_pairs['8'] = '*';
-  shift_x_pairs['9'] = '(';
-  shift_x_pairs['0'] = ')';
-  shift_x_pairs[';'] = ':';
-  shift_x_pairs[','] = '<';
-  shift_x_pairs['.'] = '>';
-  shift_x_pairs['/'] = '?';
-  shift_x_pairs['['] = '{';
-  shift_x_pairs[']'] = '}';
-  shift_x_pairs['-'] = '_';
-  shift_x_pairs['='] = '+';
-  shift_x_pairs['\''] = '\"';
 }
 
 window::~window() { destroy(); }
@@ -36,13 +17,12 @@ void window::destroy() {
 }
 
 bool window::init() {
-  int WIDTH = 640;
-  int HEIGHT = 480;
-  int X_POS = 0;
-  int Y_POS = 0;
+  int X_POS = (getdisplaywidth() - WINDOW_WIDTH) / 2;
+  int Y_POS = (getdisplayheight() - WINDOW_HEIGHT) / 2;
 
-  win = SDL_CreateWindow("File Editor", X_POS, Y_POS, WIDTH, HEIGHT,
-                         SDL_WINDOW_RESIZABLE);
+  // initialize window
+  win = SDL_CreateWindow("File Editor", X_POS, Y_POS, WINDOW_WIDTH,
+                         WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
   if (!win) {
     std::cout << "Creating window failed with error: " << SDL_GetError()
               << std::endl;
@@ -52,62 +32,63 @@ bool window::init() {
   if (!renderer) {
     std::cout << "Creating renderer failed with error: " << SDL_GetError()
               << std::endl;
+    return false;
   }
-  centerwindow(0.9);
-  setwindowwidthheight();
+
+  // initialize window settings
   setlineheightandletterwidth();
   setnumlinesonwindow();
-  renderemptyscreen();
+  setcharsperline();
   setcapslock();
   mode = VISUAL;
 
   return true;
 }
 
-void window::loadfile(std::string filepath) {
-  if (!readfromfile(filepath)) {
-    return;
-  }
-  setcharsperline();
-  renderclear();
-  renderlines();
-  rendervimmode();
-  renderpresent();
-}
+bool window::loadfile(std::string filepath) { return readfromfile(filepath); }
 
 void window::run() {
   SDL_Event e;
   bool quit = false;
+  SDL_StartTextInput();
+
   while (!quit) {
     while (SDL_PollEvent(&e)) {
+      uint32_t begin, end;
+      begin = SDL_GetTicks();
+
       switch (e.type) {
       case SDL_QUIT:
         quit = true;
+        end = SDL_GetTicks();
         break;
       case SDL_KEYUP: {
-        uint32_t begin = SDL_GetTicks();
         handlekbup(e);
-        uint32_t end = SDL_GetTicks();
-        if (end - begin < (1000 / GOLDFPS)) {
-          SDL_Delay((1000 / GOLDFPS) - (end - begin));
-        }
+        end = SDL_GetTicks();
         break;
       }
-      case SDL_KEYDOWN: {
-        uint32_t begin = SDL_GetTicks();
-        handlekbdown(e);
+      case SDL_TEXTINPUT: {
+        handletextinput(e.text.text);
         renderclear();
-        renderlines();
-        rendervimmode();
-        renderpresent();
-        uint32_t end = SDL_GetTicks();
-        if (end - begin < (1000 / GOLDFPS)) {
-          SDL_Delay((1000 / GOLDFPS) - (end - begin));
-        }
+        end = SDL_GetTicks();
         break;
       }
-      default:
-        SDL_Delay(1000 / GOLDFPS);
+        /*
+        case SDL_KEYDOWN: {
+          handlekbdown(e);
+          renderclear();
+          renderlines();
+          rendervimmode();
+          renderpresent();
+          end = SDL_GetTicks();
+          break;
+        }
+        */
+      }
+
+      int diff = end - begin;
+      if (diff < FRAMERATE) {
+        SDL_Delay(FRAMERATE - diff);
       }
     }
   }

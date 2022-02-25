@@ -8,6 +8,11 @@ void line::addchar(char &c) { text += c; }
 
 void line::addchar(char &c, size_t idx) { text.insert(idx, std::string(1, c)); }
 
+void line::addchar(const char *c, size_t idx) {
+  std::string cs = chartostring(c);
+  text.insert(idx, cs);
+}
+
 void line::addstr(std::string &s) { text += s; }
 
 void line::addstr(std::string &s, size_t idx) { text.insert(idx, s); }
@@ -34,4 +39,9 @@ std::string line::gettext(int start, int length) {
 line &line::operator=(const line &other) {
   text = other.text;
   return *this;
+}
+
+std::string line::chartostring(const char *cstr) {
+  std::string str(cstr);
+  return str;
 }
